@@ -105,7 +105,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const modalTrigger = document.querySelectorAll('[data-modal]'),
             modal = document.querySelector('.modal');
-           
+
+    modalTrigger.forEach(btn => {
+        btn.addEventListener('click', openModal);
+    });
+        
+    function closeModal () {
+        modal.classList.add('hide');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
 
     function openModal() {
             modal.classList.add('show');
@@ -113,18 +122,6 @@ window.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = 'hidden';
             clearInterval(modalTimerId);
         }      
-
-    modalTrigger.forEach(btn => {
-        btn.addEventListener('click', openModal);
-    });
-
-   
-
-    function closeModal () {
-        modal.classList.add('hide');
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
 
 
     modal.addEventListener('click', (e) => {
@@ -139,10 +136,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 50000);
+    const modalTimerId = setTimeout(openModal, 5000);
 
     function showModalByScroll() {
-        if (window.scrollY + document.documentElement.clientHeight >= document.documentElement -1) {
+        if (window.scrollY + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
             openModal();
             window.removeEventListener('scroll', showModalByScroll);
         }
@@ -251,7 +248,7 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const statusMessage = document.createElement('img');
+            let statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
             statusMessage.style.cssText = ` 
             display: block;
@@ -261,7 +258,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const request = new XMLHttpRequest();
             request.open('POST', 'server.php');
             
-             request.setRequestHeader('Content-type', 'application/json');
+             request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             const formData = new FormData(form);
 
             const object = {};
@@ -282,21 +279,22 @@ window.addEventListener('DOMContentLoaded', () => {
                 } else {
                     showThanksMoadal(message.failure);
                 }
-            })
-        })
+            });
+        });
     }
+
     function showThanksMoadal (message) {
-        const prevModalDialog = document.querySelector('.modal_dialog');
+        const prevModalDialog = document.querySelector('.modal__dialog');
 
         prevModalDialog.classList.add('hide');
         openModal();
 
         const thanksModal = document.createElement('div');
-        thanksModal.classList.add('modal_dialog');
+        thanksModal.classList.add('modal__dialog');
         thanksModal.innerHTML = `
-        <div class="modal_content">
-            <div class="modal_close" data-close>x</div>
-            <div class="modal_title">${message}</div>
+        <div class="modal__content">
+            <div class="modal__close" data-close>&times;</div>
+            <div class="modal__title">${message}</div>
         </div>
         `;
 
