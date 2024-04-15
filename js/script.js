@@ -36,7 +36,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    //Timer
+    //* Timer ---------------------------------------------------------------
 
     const deadLine = '2024-06-06';
 
@@ -101,7 +101,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     setClock('.timer', deadLine);
 
-    // Modal
+    //* Modal --------------------------------------------------------------------
 
     const modalTrigger = document.querySelectorAll('[data-modal]'),
             modal = document.querySelector('.modal');
@@ -250,7 +250,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // ).render();
 
-    // Forms
+    //* Forms ----------------------------------------------------------
 
     const forms = document.querySelectorAll('form');
 
@@ -335,83 +335,263 @@ window.addEventListener('DOMContentLoaded', () => {
         .then(data => data.json())
         .then(res => console.log(res));
 
-    //*Slider
+    ////////////////////////////////////////////////////////////////*Slider
 
-    let slideIndex = 1;
     let offset = 0;
+    let slideIndex = 1;
 
     const slides = document.querySelectorAll('.offer__slide'),
+        slider = document.querySelector('.offer__slider'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         total = document.querySelector('#total'),
         current = document.querySelector('#current'),
         slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-        slidesField = document.querySelector('.offer__slider-inner'),
-        width = window.getComputedStyle(slidesWrapper).width;
+        width = window.getComputedStyle(slidesWrapper).width,
+        slidesField = document.querySelector('.offer__slider-inner');
 
-        
+    if (slides.length < 10) {
+        total.textContent = `0${slides.length}`;
+        current.textContent =  `0${slideIndex}`;
+    } else {
+        total.textContent = slides.length;
+        current.textContent =  slideIndex;
+    }
+    
+    slidesField.style.width = 100 * slides.length + '%';
+    slidesField.style.display = 'flex';
+    slidesField.style.transition = '0.5s all';
 
-       if (slides.length < 10) {
-		total.textContent = `0${slides.length}`;
-		current.textContent = `0${slideIndex}`;
-	    } else {
-		total.textContent = slides.length;
-		current.textContent = slideIndex;
-	    }
+    slidesWrapper.style.overflow = 'hidden';
 
-	slidesField.style.width = 100 * slides.length + "%";
-	slidesField.style.display = "flex";
-	slidesField.style.transition = "0.5s all";
+    slides.forEach(slide => {
+        slide.style.width = width;
+    });
 
-	slidesWrapper.style.overflow = "hidden";
+    slider.style.position = 'relative';
 
-	slides.forEach((slide) => {
-		slide.style.width = width;
-	});
+    const indicators = document.createElement('ol'),
+          dots = [];
+    indicators.classList.add('carousel-indicators');
+    indicators.style.cssText = `
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: flex;
+        justify-content: center;
+        margin-right: 15%;
+        margin-left: 15%;
+        list-style: none;
+    `; // Если хотите - добавьте в стили, но иногда у нас нет доступа к стилям
+    slider.append(indicators);
 
-	next.addEventListener("click", () => {
-		if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) {
-			offset = 0;
-		} else {
-			offset += +width.slice(0, width.length - 2);
-		}
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to', i + 1);
+        dot.style.cssText = `
+            box-sizing: content-box;
+            flex: 0 1 auto;
+            width: 30px;
+            height: 6px;
+            margin-right: 3px;
+            margin-left: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            background-clip: padding-box;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            opacity: .5;
+            transition: opacity .6s ease;
+        `;
+        if (i == 0) {
+            dot.style.opacity = 1;
+        }
+        indicators.append(dot);
+        dots.push(dot);
+    }
 
-		slidesField.style.transform = `translateX(-${offset}px)`;
+    function deleteNotDigits (str) {
+        return +str.replace(/\D/g, '');
+    }
 
-		if (slideIndex == slides.length) {
-			slideIndex = 1;
-		} else {
-			slideIndex++;
-		}
+    next.addEventListener('click', () => {
+        if (offset == deleteNotDigits(width) * (slides.length - 1)) {
+            offset = 0;
+        } else {
+            offset += deleteNotDigits(width) ; 
+        }
 
-		if (slides.length < 10) {
-			current.textContent = `0${slideIndex}`;
-		} else {
-			current.textContent = slideIndex;
-		}
-	});
+        slidesField.style.transform = `translateX(-${offset}px)`;
 
-	prev.addEventListener("click", () => {
-		if (offset == 0) {
-			offset = +width.slice(0, width.length - 2) * (slides.length - 1);
-		} else {
-			offset -= +width.slice(0, width.length - 2);
-		}
+        if (slideIndex == slides.length) {
+            slideIndex = 1;
+        } else {
+            slideIndex++;
+        }
 
-		slidesField.style.transform = `translateX(-${offset}px)`;
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
+        } else {
+            current.textContent =  slideIndex;
+        }
 
-		if (slideIndex == 1) {
-			slideIndex = slides.length;
-		} else {
-			slideIndex--;
-		}
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[slideIndex-1].style.opacity = 1;
+    });
 
-		if (slides.length < 10) {
-			current.textContent = `0${slideIndex}`;
-		} else {
-			current.textContent = slideIndex;
-		}
-	});
+    prev.addEventListener('click', () => {
+        if (offset == 0) {
+            offset = deleteNotDigits(width)  * (slides.length - 1);
+        } else {
+            offset -= deleteNotDigits(width) ;
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        if (slideIndex == 1) {
+            slideIndex = slides.length;
+        } else {
+            slideIndex--;
+        }
+
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
+        } else {
+            current.textContent =  slideIndex;
+        }
+
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[slideIndex-1].style.opacity = 1;
+    });
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
+
+            slideIndex = slideTo;
+            offset = deleteNotDigits(width)  * (slideTo - 1);
+
+            slidesField.style.transform = `translateX(-${offset}px)`;
+
+            if (slides.length < 10) {
+                current.textContent =  `0${slideIndex}`;
+            } else {
+                current.textContent =  slideIndex;
+            }
+
+            dots.forEach(dot => dot.style.opacity = ".5");
+            dots[slideIndex-1].style.opacity = 1;
+        });
+    });
+
+    //* Calculator ------------------------------------------------
+
+    const result = document.querySelector('.calculating__result span');
+    let sex, height, weight, age, ratio;
+    
+    if (localStorage.getItem('sex')) {
+        sex = localStorage.getItem('sex');
+    } else  {
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    if (localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else  {
+        ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    function initLocalSettings(selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.classList.remove(activeClass);
+            if (elem.getAttribute('id') === localStorage.getItem('sex')) {
+                elem.classList.add(activeClass);
+            }
+            if (elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
+
+
+    function calcTotal () {
+        if (!sex || !height || !weight || !age || !ratio) {
+            result.textContent = '____';
+            return;
+        }
+
+        if (sex === 'female') {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+    }
+
+    calcTotal();
+
+    function getStaticInformation (selector, activeClass) {
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio');
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio'));
+                } else {
+                    sex = e.target.getAttribute('id');
+                    localStorage.setItem('sex', e.target.getAttribute('id'));
+                }
+    
+                elements.forEach(elem => {
+                    elem.classList.remove(activeClass);
+                });
+    
+                e.target.classList.add(activeClass);
+                calcTotal();
+            })
+        });
+    }
+
+    getStaticInformation('#gender div', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
+
+    function getDynamicInformation(selector) {
+        const input = document.querySelector(selector);
+
+        input.addEventListener('input', () => {
+
+            if (input.value.match(/\D/g)) {
+                input.style.border = '1px solid red';
+            } else {
+                input.style.border = 'none';
+            }
+
+            switch(input.getAttribute('id')) {
+                case 'height':
+                    height = +input.value;
+                    break;
+                case 'weight':
+                    weight = +input.value;
+                    break;
+                case 'age':
+                    age = +input.value;
+                    break;
+            }
+            calcTotal();
+        }); 
+    }
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
+});
     // showSlides(slideIndex);
 
     // if (slides.length < 10) {
@@ -452,6 +632,4 @@ window.addEventListener('DOMContentLoaded', () => {
     // });
 
 
-
-});
 
